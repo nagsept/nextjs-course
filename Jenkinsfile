@@ -9,12 +9,14 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
         stage('Checkout Code') {
             steps {
-                script {
-                    // Clean workspace before fresh clone
-                    deleteDir()
-                }
                 git branch: "${BRANCH}", url: "${GIT_REPO}"
             }
         }
@@ -27,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Container') {
+        stage('Run Docker Container') {
             steps {
                 script {
                     sh """
@@ -41,11 +43,11 @@ pipeline {
     }
 
     post {
-        failure {
-            echo "Build or deployment failed. Please check the logs."
-        }
         success {
-            echo "Next.js app deployed successfully in Docker container: ${APP_NAME}"
+            echo "✅ Deployment successful: App running in container '${APP_NAME}' on port 3000"
+        }
+        failure {
+            echo "❌ Build or deployment failed. Check the logs."
         }
     }
 }
