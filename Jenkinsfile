@@ -24,17 +24,16 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+stage('Build Docker Image') {
     steps {
         script {
-            echo "🐳 Attempting to build Docker image..."
+            echo "🐳 Building Docker image manually..."
             try {
-                docker.build("${DOCKER_IMAGE}")
+                sh "docker build -t ${DOCKER_IMAGE} ."
                 echo "✅ Docker image built successfully."
             } catch (err) {
-                echo "❌ Docker build failed with error:"
-                echo "${err.getMessage()}"
-                error("Stopping pipeline due to build failure.")
+                echo "❌ Docker build failed: ${err.getMessage()}"
+                error("Stopping pipeline.")
             }
         }
     }
