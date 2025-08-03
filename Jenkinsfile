@@ -11,20 +11,25 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
+                echo "🧹 Cleaning workspace..."
                 deleteDir()
             }
         }
 
         stage('Checkout Code') {
             steps {
+                echo "📥 Cloning code from GitHub..."
                 git branch: "${BRANCH}", url: "${GIT_REPO}"
+                echo "✅ Checkout complete."
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo "🐳 Attempting to build Docker image..."
                     docker.build("${DOCKER_IMAGE}")
+                    echo "✅ Docker image built successfully."
                 }
             }
         }
@@ -32,22 +37,24 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
+                    echo "🚀 Running Docker container..."
                     sh """
                         docker stop ${APP_NAME} || true
                         docker rm ${APP_NAME} || true
                         docker run -d --name ${APP_NAME} -p 3000:3000 ${DOCKER_IMAGE}
                     """
+                    echo "✅ Docker container running."
                 }
             }
         }
     }
 
     post {
-        success {
-            echo "✅ Deployment successful: App running in container '${APP_NAME}' on port 3000"
-        }
         failure {
-            echo "❌ Build or deployment failed. Check the logs."
+            echo "❌ Pipeline failed. Check the stage output above."
+        }
+        success {
+            echo "🎉 App deployed successfully at http://<your-server-ip>:3000"
         }
     }
 }
