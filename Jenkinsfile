@@ -24,21 +24,23 @@ pipeline {
             }
         }
 
-stage('Build Docker Image') {
-    steps {
-        script {
-            echo "🐳 Building Docker image manually..."
-            try {
-                sh "docker build -t ${DOCKER_IMAGE} ."
-                echo "✅ Docker image built successfully."
-            } catch (err) {
-                echo "❌ Docker build failed: ${err.getMessage()}"
-                error("Stopping pipeline.")
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo "🐳 Building Docker image manually..."
+                    try {
+                        // Use --progress=plain for more verbose output
+                        sh 'docker build --progress=plain -t ${DOCKER_IMAGE} .'
+                        echo "✅ Docker image built successfully."
+                    } catch (err) {
+                        echo "❌ Docker build failed!"
+                        // Show full Docker logs from build if available
+                        sh 'cat /root/.npm/_logs/*.log || echo "No NPM logs found."'
+                        error("Stopping pipeline: ${err.getMessage()}")
+                    }
+                }
             }
         }
-    }
-}
-
 
         stage('Run Docker Container') {
             steps {
